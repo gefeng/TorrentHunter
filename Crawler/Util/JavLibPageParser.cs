@@ -45,60 +45,73 @@ namespace TorrentHunter.THCrawler.Util
 
             AvInfo info = new AvInfo();
 
-            // <div id="content">
-            //  <div id="rightcolumn">
-            //HtmlNode content = _doc.DocumentNode.SelectSingleNode(XpathContent);
-
-            // Video cover image
-            HtmlNode videoCover = _doc.DocumentNode.SelectSingleNode(XpathVideoCover);
-            info.CoverImg = new Uri(videoCover.GetAttributeValue("src", null));
-
-            // Title
-            info.Title = _doc.DocumentNode.SelectSingleNode(XpathTitle).InnerText;
-
-            // <div id="video_info">
-            HtmlNode videoInfo = _doc.DocumentNode.SelectSingleNode(XpathVideoInfo);
-
-            // <div id="video_id">
-            HtmlNode videoId = videoInfo.SelectSingleNode(XpathVideoId);
-            info.Id = videoId.SelectSingleNode(XpathTdData).InnerText;
-
-            // <div id="video_date">
-            HtmlNode videoDate = videoInfo.SelectSingleNode(XpathVideoDate);
-            info.ReleaseDate = DateTime.ParseExact(videoDate.SelectSingleNode(XpathTdData).InnerText, "yyyy-MM-dd", CultureInfo.InvariantCulture);
-
-            // <div id="video_length">
-            HtmlNode videoLength = videoInfo.SelectSingleNode(XpathVideoLength);
-            info.Length = int.Parse(videoLength.SelectSingleNode(XpathSpanData).InnerText);
-
-            // <div id="video_director">
-            HtmlNode videoDirector = videoInfo.SelectSingleNode(XpathVideoDirector);
-            info.Director = videoDirector.SelectSingleNode(XpathTdData).InnerText;
-
-            // <div id="video_maker">
-            HtmlNode videoMaker = videoInfo.SelectSingleNode(XpathVideoMaker);
-            info.Maker = videoMaker.SelectSingleNode(XpathAData).InnerText;
-
-            // <div id="video_label">
-            HtmlNode videoLabel = videoInfo.SelectSingleNode(XpathVideoLabel);
-            info.Publisher = videoLabel.SelectSingleNode(XpathAData).InnerText;
-
-            // <div id="video_review">
-            HtmlNode videoReview = videoInfo.SelectSingleNode(XpathVideoReview);
-            string score = videoReview.SelectSingleNode(XpathSpanScore).InnerText;
-            if (string.IsNullOrEmpty(score))
+            try
             {
-                info.Score = -1;
+
+                // <div id="content">
+                //  <div id="rightcolumn">
+                //HtmlNode content = _doc.DocumentNode.SelectSingleNode(XpathContent);
+
+                // Video cover image
+                HtmlNode videoCover = _doc.DocumentNode.SelectSingleNode(XpathVideoCover);
+                info.CoverImg = new Uri(videoCover.GetAttributeValue("src", null));
+
+                // Title
+                info.Title = _doc.DocumentNode.SelectSingleNode(XpathTitle).InnerText;
+
+                // <div id="video_info">
+                HtmlNode videoInfo = _doc.DocumentNode.SelectSingleNode(XpathVideoInfo);
+
+                // <div id="video_id">
+                HtmlNode videoId = videoInfo.SelectSingleNode(XpathVideoId);
+                info.Id = videoId.SelectSingleNode(XpathTdData).InnerText;
+
+                // <div id="video_date">
+                HtmlNode videoDate = videoInfo.SelectSingleNode(XpathVideoDate);
+                info.ReleaseDate = DateTime.ParseExact(videoDate.SelectSingleNode(XpathTdData).InnerText, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+
+                // <div id="video_length">
+                HtmlNode videoLength = videoInfo.SelectSingleNode(XpathVideoLength);
+                info.Length = int.Parse(videoLength.SelectSingleNode(XpathSpanData).InnerText);
+
+                // <div id="video_director">
+                HtmlNode videoDirector = videoInfo.SelectSingleNode(XpathVideoDirector);
+                info.Director = videoDirector.SelectSingleNode(XpathTdData).InnerText;
+
+                // <div id="video_maker">
+                HtmlNode videoMaker = videoInfo.SelectSingleNode(XpathVideoMaker);
+                info.Maker = videoMaker.SelectSingleNode(XpathAData).InnerText;
+
+                // <div id="video_label">
+                // Should check whethter the publisher is empty
+                HtmlNode videoLabel = videoInfo.SelectSingleNode(XpathVideoLabel);
+                string publisher = videoLabel.SelectSingleNode(XpathTdData).InnerText;
+                info.Publisher = string.IsNullOrEmpty(publisher) ? videoLabel.SelectSingleNode(XpathAData).InnerText : publisher;
+
+                // <div id="video_review">
+                HtmlNode videoReview = videoInfo.SelectSingleNode(XpathVideoReview);
+                if (videoReview != null)
+                {
+                    string score = videoReview.SelectSingleNode(XpathSpanScore).InnerText;
+                    if (string.IsNullOrEmpty(score))
+                    {
+                        info.Score = -1;
+                    }
+                    else
+                    {
+                        score = score.Replace("(", "").Replace(")", "");
+                        info.Score = float.Parse(score);
+                    }
+                }
+
+                // <div id="video_genres">
+
+                // <div id="video_cast">
             }
-            else
+            catch (Exception e)
             {
-                score = score.Replace("(", "").Replace(")", "");
-                info.Score = float.Parse(score);
+                Logger.Write(e.ToString());
             }
-
-            // <div id="video_genres">
-
-            // <div id="video_cast">
 
             return info;
         }

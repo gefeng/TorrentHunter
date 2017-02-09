@@ -57,6 +57,7 @@ namespace TorrentHunter.THCrawler.Core
         public void Clear()
         {
             _pageToCrawlRepository.Clear();
+            _crawledUrlRepository.Clear();
         }
 
         public void AddKnownUri(Uri uri)

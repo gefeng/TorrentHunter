@@ -17,5 +17,10 @@ namespace TorrentHunter.THCrawler.Core
         /// Add uri to respository if it hasn't been added
         /// </summary>
         bool AddIfNew(Uri uri);
+
+        /// <summary>
+        /// Clear the repository
+        /// </summary>
+        void Clear();
     }
 }

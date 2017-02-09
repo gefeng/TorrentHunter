@@ -56,6 +56,7 @@
     <Compile Include="Crawler\Crawler.cs" />
     <Compile Include="Crawler\ICrawler.cs" />
     <Compile Include="Core\IScheduler.cs" />
+    <Compile Include="Crawler\IJavlibCrawler.cs" />
     <Compile Include="Crawler\JavlibCrawler.cs" />
     <Compile Include="Util\HTMLPageParser.cs" />
     <Compile Include="Util\JavLibPageParser.cs" />

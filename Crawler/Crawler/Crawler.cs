@@ -19,8 +19,9 @@ namespace TorrentHunter.THCrawler.Crawler
         protected CrawlResult _crawlResult;
         protected CrawlContext _crawlContext;
         protected IThreadManager _threadManager;
-        protected IScheduler _scheduler;
         protected IPageRequester _pageRequester;
+        protected IScheduler _scheduler;
+        protected IList<string> _filter;
         //protected IHTMLPageParser _htmlPageParser;
         protected bool _crawlComplete;
         protected Timer _timeoutTimer;
@@ -37,6 +38,8 @@ namespace TorrentHunter.THCrawler.Crawler
             _scheduler = new Scheduler();
 
             _pageRequester = new PageRequester(crawlConfiguration);
+
+            _filter = new List<string>();
 
             //_htmlPageParser = new HTMLPageParser();
         }
@@ -90,6 +93,9 @@ namespace TorrentHunter.THCrawler.Crawler
                     _threadManager.Dispose();
             }
 
+            /*if (_timeoutTimer != null)
+                _timeoutTimer.Stop();*/
+
             timer.Stop();
             _crawlResult.Elapsed = timer.Elapsed;
 
@@ -126,8 +132,6 @@ namespace TorrentHunter.THCrawler.Crawler
         protected virtual void CrawlSite()
         {
             Logger.Write("Start to crawl the site");
-
-            System.Threading.Thread.CurrentThread.Name = "MainThread";
 
             // main loop
             while (!_crawlComplete)
@@ -229,7 +233,23 @@ namespace TorrentHunter.THCrawler.Crawler
                 Uri uri = HTMLPageParser.MakeAbsoluteUri(link, page);
 
                 if (HTMLPageParser.IsInternalLink(uri, page.Uri))
-                    filteredLinks.Add(uri);
+                {
+                    // Only schedule links which contain one of the key words in filter list
+                    if (_filter != null && _filter.Count > 0)
+                    {
+                        foreach(string keyWord in _filter)
+                        {
+                            if (uri.AbsoluteUri.Contains(keyWord))
+                            {
+                                filteredLinks.Add(uri);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        filteredLinks.Add(uri);
+                    }                
+                }
             }
 
             page.ParsedLinks = (IEnumerable<Uri>)filteredLinks;

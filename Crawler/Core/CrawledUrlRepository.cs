@@ -28,6 +28,12 @@ namespace TorrentHunter.THCrawler.Core
             return _crawledUrlRepository.TryAdd(uri.AbsoluteUri, 0);
         }
 
+        public void Clear()
+        {
+            if (_crawledUrlRepository != null)
+                _crawledUrlRepository.Clear();
+        }
+
         #endregion
 
         #region IDisposable

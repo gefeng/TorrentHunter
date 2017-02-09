@@ -9,7 +9,7 @@ using TorrentHunter.THCrawler.Util;
 
 namespace TorrentHunter.THCrawler.Crawler
 {
-    public class JavlibCrawler : Crawler
+    public class JavlibCrawler : Crawler, IJavlibCrawler
     {
         private IList<AvInfo> _avInfoList;
 
@@ -24,17 +24,19 @@ namespace TorrentHunter.THCrawler.Crawler
             base.CrawlSite();
 
             // Download test
-           /*System.IO.DirectoryInfo di = System.IO.Directory.CreateDirectory(Environment.CurrentDirectory + "\\Cover");
+           System.IO.DirectoryInfo di = System.IO.Directory.CreateDirectory(Environment.CurrentDirectory + "\\Cover");
 
             foreach (AvInfo av in _avInfoList)
             {
+                Logger.Write(av.Id);
+
                 using (System.Net.WebClient client = new System.Net.WebClient())
                 {
-                    client.DownloadFileAsync(av.CoverImg, di + "\\" + av.Title + ".jpg");
+                    client.DownloadFileAsync(av.CoverImg, di + "\\" + av.Id + ".jpg");
                 }
-            }*/
+            }
         }
-
+        
         protected override void ProcessPageContent(PageCrawled page)
         {
             if (page.Content == null)
@@ -69,11 +71,52 @@ namespace TorrentHunter.THCrawler.Crawler
 
             AvInfo avInfo = parser.GetVideoInfo();
 
+            Logger.Write($"ID: [{avInfo.Id}]; Cover: [{avInfo.CoverImg.AbsoluteUri}]");
+
             lock (_locker)
             {
                 if (avInfo != null)
                     _avInfoList.Add(avInfo);
             }
         }
+
+        #region IJavlibCrawler
+
+        public CrawlResult CrawlNewReleased(Uri uri)
+        {
+            _filter.Add("/vl_newrelease");
+            _filter.Add("/?v=");
+            return base.Crawl(uri, null);
+        }
+
+        public CrawlResult CrawlNewUpdated(Uri uri)
+        {
+            _filter.Add("/vl_update");
+            _filter.Add("/?v=");
+            return base.Crawl(uri, null);
+        }
+
+        public CrawlResult CrawlNewAdded(Uri uri)
+        {
+            _filter.Add("/vl_newentries");
+            _filter.Add("/?v=");
+            return base.Crawl(uri, null);
+        }
+
+        public CrawlResult CrawlMostWanted(Uri uri)
+        {
+            _filter.Add("/vl_mostwanted");
+            _filter.Add("/?v=");
+            return base.Crawl(uri, null);
+        }
+
+        public CrawlResult CrawlBestRated(Uri uri)
+        {
+            _filter.Add("/vl_bestrated");
+            _filter.Add("/?v=");
+            return base.Crawl(uri, null);
+        }
+
+        #endregion
     }
 }
